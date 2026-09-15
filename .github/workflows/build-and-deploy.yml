@@ -5,18 +5,31 @@ on:
     branches: [ main ]
   workflow_dispatch: {}
 
+# Grant the permissions required to deploy to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: true
+    environment: github-pages
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # This repository contains a prebuilt static site at `static-web-builder/dist`.
-      # There is no `package.json` at the repo root, so skip Node install/build steps
-      # and simply upload the `dist` folder as an artifact.
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      # This repository already contains a built static site at `static-web-builder/dist`.
+      # Upload the folder as the Pages artifact and then deploy it to GitHub Pages.
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          name: site-dist
-          path: static-web-builder/dist
+          path: './static-web-builder/dist'
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
+
