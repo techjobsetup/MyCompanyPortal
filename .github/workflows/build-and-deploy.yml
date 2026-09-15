@@ -1,0 +1,22 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # This repository contains a prebuilt static site at `static-web-builder/dist`.
+      # There is no `package.json` at the repo root, so skip Node install/build steps
+      # and simply upload the `dist` folder as an artifact.
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-dist
+          path: static-web-builder/dist
